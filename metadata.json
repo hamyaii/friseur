@@ -1,0 +1,8 @@
+{
+  "name": "Schnitt & Stil",
+  "description": "Elegante Webseite für den Friseursalon Schnitt & Stil mit Leistungsübersicht, Preisen und Kontaktanfragen.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

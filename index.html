@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schnitt & Stil | Ihr Friseursalon</title>
+    <!-- 
+      ⚠️ DSGVO-WARNUNG & ENTWICKLUNGS-PLUGINS (EXTERNAL CDNs)
+      ========================================================================
+      Die folgenden vier Zeilen laden React, React DOM, Babel und Tailwind CSS
+      über externe CDNs dritter Anbieter. Dies ist für die lokale Entwicklung 
+      und Prototypenerstellung hervorragend, verstößt aber im Live-Betrieb 
+      ohne Einwilligung gegen die DSGVO (wegen IP-Weitergabe an US-Server!).
+      
+      ANLEITUNG FÜR DSGVO-KONFORMITÄT BEIM EXPORT / LIVEGANG:
+      1. Laden Sie diese Dateien über Ihren Browser herunter.
+      2. Speichern Sie sie lokal in einen Ordner (z.B. "/js/react.js" etc.).
+      3. Passen Sie die "src"-Attribute hier entsprechend auf die lokalen Pfade an.
+      ========================================================================
+    -->
+    <!-- START: LOKAL_HERUNTERLADEN_MARKER -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ENDE: LOKAL_HERUNTERLADEN_MARKER -->
+
+    <!-- Sämtliche externen Schriftarten und Icons wurden entfernt, um 100% DSGVO-Konformität zu garantieren -->
+    
+    <style>
+        /* CSS-VARIABLEN FÜR EINFACHE FARBANPASSUNG & BILDER */
+        :root {
+            --primary-color: #c5a880; /* Elegantes Gold/Beige */
+            --dark-color: #1c1c1c;    /* Dunkles Anthrazit */
+            --light-bg: #fdfbf7;      /* Warmes Off-White */
+            --text-color: #333333;
+            --text-muted: #666666;
+            --transition: all 0.3s ease;
+
+            /* WEBSITE BILDER (GANZ OBEN ZUM SCHNELLEN ANPASSEN) */
+            --hero-bg-image: url('img/hintergrund.jpg'); /* Hintergrundbild für die Einstiegsseite */
+            --about-image: url('img/ueber-uns.jpg');     /* Optionales Bild für den "Über Uns" Bereich */
+        }
+
+        /* GLOBALE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: Georgia, Garamond, "Times New Roman", Times, serif;
+            color: var(--dark-color);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+        }
+
+        .btn-outline:hover {
+            background-color: #ffffff;
+            color: var(--dark-color);
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(28, 28, 28, 0.95);
+            color: #ffffff;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-weight: 400;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            /* Hintergrundbild aus der CSS-Variable ganz oben am Anfang des Stylesheets */
+            background: 
+                linear-gradient(rgba(28, 28, 28, 0.75), rgba(28, 28, 28, 0.90)),
+                var(--hero-bg-image) no-repeat center center / cover,
+                radial-gradient(circle at center, #3c3224 0%, #171717 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #ffffff;
+            padding-top: 80px;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* SERVICES SECTION */
+        .services {
+            background-color: #ffffff;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary-color);
+            margin: 10px auto 0;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background-color: var(--light-bg);
+            padding: 40px 30px;
+            border-radius: 4px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid #eaeaea;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--primary-color);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* PRICE LIST SECTION */
+        .prices {
+            background-color: var(--light-bg);
+        }
+
+        .price-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .price-category h3 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+
+        .price-name {
+            font-weight: 500;
+        }
+
+        .price-dots {
+            flex-grow: 1;
+            border-bottom: 1px dotted #ccc;
+            margin: 0 10px;
+        }
+
+        .price-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* ABOUT US SECTION */
+        .about {
+            background-color: #ffffff;
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
+
+        .about-img {
+            flex: 1;
+            position: relative;
+        }
+
+        .about-img img {
+            width: 100%;
+            border-radius: 4px;
+            box-shadow: 10px 10px 0px var(--primary-color);
+        }
+
+        /* INFO & CONTACT SECTION */
+        .contact {
+            background-color: var(--dark-color);
+            color: #ffffff;
+        }
+
+        .contact h2, .contact h3 {
+            color: #ffffff;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .contact-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .contact-info ul li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #ccc;
+        }
+
+        .contact-info ul li i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .hours-list li {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        .contact-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-form input, .contact-form textarea {
+            padding: 12px;
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            color: #ffffff;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .contact-form input:focus, .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #111111;
+            color: #777777;
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #222;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #aaa;
+            margin: 0 10px;
+            transition: var(--transition);
+        }
+
+        footer a:hover {
+            color: var(--primary-color);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .price-container {
+                grid-template-columns: 1fr;
+            }
+            .about-content {
+                flex-direction: column;
+            }
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: rgba(28, 28, 28, 0.98);
+                padding: 20px;
+                gap: 15px;
+                border-bottom: 2px solid var(--primary-color);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <div class="navbar">
+            <div class="logo">Schnitt<span>&</span>Stil</div>
+            <nav>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#services">Leistungen</a></li>
+                    <li><a href="#prices">Preise</a></li>
+                    <li><a href="#about">Über uns</a></li>
+                    <li><a href="#contact">Kontakt</a></li>
+                    <li><a href="#contact" class="btn btn-booking" style="padding: 8px 20px;">Termin buchen</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle" id="menuToggle">
+                <svg id="menuIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 28px; height: 28px; display: block;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Ihr Haar in besten Händen</h1>
+            <p>Moderner Style, professionelle Pflege & individuelle Beratung</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn">Termin vereinbaren</a>
+                <a href="#prices" class="btn btn-outline">Unsere Preise</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Unsere Leistungen</h2>
+                <p>Wir bieten Ihnen das komplette Verwöhnprogramm für Ihre Haare</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; display: inline-block; color: var(--primary-color);">
+                            <circle cx="6" cy="6" r="3" />
+                            <circle cx="6" cy="18" r="3" />
+                            <line x1="9.8" y1="8.2" x2="21" y2="17" />
+                            <line x1="9.8" y1="15.8" x2="21" y2="7" />
+                        </svg>
+                    </div>
+                    <h3>Haarschnitt & Styling</h3>
+                    <p>Individuelle Schnitte, die zu Ihrer Persönlichkeit passen. Vom klassischen Schnitt bis hin zu modernen Trends.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; display: inline-block; color: var(--primary-color);">
+                            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
+                            <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z" />
+                            <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z" />
+                        </svg>
+                    </div>
+                    <h3>Farbe & Highlights</h3>
+                    <p>Brillante Farben, Balayage oder klassische Strähnen. Wir nutzen haarschonende, hochwertige Farbprodukte.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; display: inline-block; color: var(--primary-color);">
+                            <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                        </svg>
+                    </div>
+                    <h3>Pflege & Wellness</h3>
+                    <p>Intensive Pflegekuren und Kopfhautmassagen für gesundes, glänzendes Haar und pure Entspannung.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICE LIST SECTION -->
+    <section id="prices" class="prices">
+        <div class="container">
+            <div class="section-title">
+                <h2>Preise</h2>
+                <p>Ein Auszug aus unserem Verwöhn- und Serviceangebot</p>
+            </div>
+            <div class="price-container">
+                <!-- Damen -->
+                <div class="price-category">
+                    <h3>Damen</h3>
+                    <div class="price-item">
+                        <span class="price-name">Waschen, Schneiden, Föhnen</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">ab 55,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Styling (Föhnen / Glätten)</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">ab 35,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Ansatzfarbe</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">ab 49,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Balayage / Komplett-Färbung</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">ab 95,00 €</span>
+                    </div>
+                </div>
+
+                <!-- Herren & Kinder -->
+                <div class="price-category">
+                    <h3>Herren & Kinder</h3>
+                    <div class="price-item">
+                        <span class="price-name">Herrenhaarschnitt (Trocken)</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">25,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Waschen, Schneiden, Styling</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">32,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Bartpflege & Konturen</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">18,00 €</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-name">Kinder (bis 12 Jahre)</span>
+                        <span class="price-dots"></span>
+                        <span class="price-value">20,00 €</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT US SECTION -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <div class="section-title" style="text-align: left; margin-bottom: 30px;">
+                        <h2>Über uns</h2>
+                    </div>
+                    <p>Herzlich willkommen bei <strong>Schnitt & Stil</strong>. Seit über 10 Jahren steht unser Salon für handwerkliche Präzision, Leidenschaft und ein feines Gespür für Trends.</p>
+                    <p>Unser Ziel ist es, dass Sie sich nicht nur über ein perfektes Ergebnis freuen, sondern auch die Zeit bei uns in entspannter Atmosphäre genießen können. Wir nehmen uns Zeit für eine ausführliche Beratung, um das Beste aus Ihrem Typ herauszuholen.</p>
+                    <p>Besuchen Sie uns und lassen Sie sich verwöhnen – wir freuen uns auf Sie!</p>
+                </div>
+                <div class="about-img">
+                    <!-- 
+                      💡 TIPP ZUM BILD-AUSTAUSCH:
+                      Wenn Sie die goldene Grafik durch ein echtes Foto (z.B. von Ihrem Team oder Ihrem Salon) ersetzen möchten, 
+                      löschen oder kommentieren Sie das <svg> unten aus und verwenden Sie stattdessen dieses Bild:
+                      
+                      <img src="img/ueber-uns.jpg" alt="Unser Salon und Team" style="width: 100%; height: auto; border-radius: 4px; box-shadow: 10px 10px 0px var(--primary-color); display: block;">
+                    -->
+                    <!-- 100% DSGVO-konforme, hochauflösende Vektorgrafik - Verhindert jegliche IP-Datenübertragung ins EU-Ausland -->
+                    <svg viewBox="0 0 500 400" style="width: 100%; height: auto; border-radius: 4px; box-shadow: 10px 10px 0px var(--primary-color); background-color: var(--dark-color); display: block;" aria-label="Schnitt & Stil Premium Salon Emblem">
+                        <!-- Luxury Art Deco Background Grid -->
+                        <rect width="100%" height="100%" fill="#1c1c1c" />
+                        <path d="M 0,0 L 500,400 M 500,0 L 0,400" stroke="rgba(197, 168, 128, 0.05)" stroke-width="1" />
+                        <rect x="20" y="20" width="460" height="360" rx="4" fill="none" stroke="var(--primary-color)" stroke-width="1.5" opacity="0.4" />
+                        <rect x="30" y="30" width="440" height="340" rx="4" fill="none" stroke="var(--primary-color)" stroke-width="2" opacity="0.8" />
+                        
+                        <!-- Center Emblem -->
+                        <circle cx="250" cy="200" r="100" fill="#1c1c1c" stroke="var(--primary-color)" stroke-width="2" />
+                        <circle cx="250" cy="200" r="92" fill="none" stroke="var(--primary-color)" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+                        
+                        <!-- Scissors Silhouette in Gold -->
+                        <g transform="translate(250, 155) scale(0.95)" stroke="var(--primary-color)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="-18" cy="40" r="12" />
+                            <circle cx="18" cy="40" r="12" />
+                            <path d="M -12,28 L 15,-40" />
+                            <path d="M 12,28 L -15,-40" />
+                            <circle cx="0" cy="10" r="3" fill="var(--primary-color)" />
+                        </g>
+                        
+                        <!-- Decorative Hairstyling Waves / Sparkles -->
+                        <path d="M 100,200 Q 120,180 140,200 T 180,200" fill="none" stroke="var(--primary-color)" stroke-width="1.5" opacity="0.5" />
+                        <path d="M 320,200 Q 340,220 360,200 T 400,200" fill="none" stroke="var(--primary-color)" stroke-width="1.5" opacity="0.5" />
+                        
+                        <!-- Stars/Sparkles -->
+                        <path d="M 250,65 L 253,75 L 263,78 L 253,81 L 250,91 L 247,81 L 237,78 L 247,75 Z" fill="var(--primary-color)" opacity="0.9" />
+                        <path d="M 80,80 L 81.5,85 L 86.5,86 L 81.5,87 L 80,92 L 78.5,87 L 73.5,86 L 78.5,85 Z" fill="var(--primary-color)" opacity="0.6" transform="scale(0.8) translate(50, 50)" />
+                        <path d="M 420,320 L 421.5,325 L 426.5,326 L 421.5,327 L 420,332 L 418.5,327 L 413.5,326 L 418.5,325 Z" fill="var(--primary-color)" opacity="0.6" />
+
+                        <!-- Salon Typography -->
+                        <text x="250" y="275" font-family="Georgia, serif" font-size="20" fill="var(--primary-color)" text-anchor="middle" letter-spacing="4" font-weight="bold">SCHNITT</text>
+                        <text x="250" y="300" font-family="Georgia, serif" font-size="16" fill="var(--primary-color)" text-anchor="middle" font-style="italic" opacity="0.8">&amp;</text>
+                        <text x="250" y="325" font-family="Georgia, serif" font-size="20" fill="var(--primary-color)" text-anchor="middle" letter-spacing="4" font-weight="bold">STIL</text>
+                        
+                        <text x="250" y="355" font-family="-apple-system, sans-serif" font-size="10" fill="var(--primary-color)" text-anchor="middle" letter-spacing="2" opacity="0.6">HANDWERK &amp; ELEGANZ</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT & INFO SECTION -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Kontakt & Öffnungszeiten</h2>
+                <p>Besuchen Sie uns oder vereinbaren Sie direkt einen Termin</p>
+            </div>
+            <div class="contact-grid">
+                <!-- Kontaktinfo -->
+                <div class="contact-info">
+                    <h3>So finden Sie uns</h3>
+                    <ul>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: inline-block; color: var(--primary-color); vertical-align: middle; margin-right: 15px;">
+                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            Musterstraße 12, 12345 Musterstadt
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: inline-block; color: var(--primary-color); vertical-align: middle; margin-right: 15px;">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                            +49 (0) 123 456789
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: inline-block; color: var(--primary-color); vertical-align: middle; margin-right: 15px;">
+                                <rect width="20" height="16" x="2" y="4" rx="2" />
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                            </svg>
+                            info@schnitt-und-stil.de
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Öffnungszeiten -->
+                <div class="contact-info">
+                    <h3>Öffnungszeiten</h3>
+                    <ul class="hours-list">
+                        <li><span>Montag</span> <span>Geschlossen</span></li>
+                        <li><span>Dienstag - Freitag</span> <span>09:00 - 18:30 Uhr</span></li>
+                        <li><span>Samstag</span> <span>09:00 - 14:00 Uhr</span></li>
+                        <li><span>Sonntag</span> <span>Geschlossen</span></li>
+                    </ul>
+                </div>
+
+                <!-- Termin-Anfrage -->
+                <div class="contact-form">
+                    <h3>Nachricht senden</h3>
+                    <form action="#" method="POST" id="contactForm" onsubmit="showToast('Vielen Dank für Ihre Nachricht! Wir haben Ihre Anfrage erhalten.'); this.reset(); return false;">
+                        <input type="text" placeholder="Ihr Name" required>
+                        <input type="email" placeholder="Ihre E-Mail-Adresse" required>
+                        <textarea rows="4" placeholder="Ihre Nachricht / Terminwunsch" required></textarea>
+                        
+                        <!-- DSGVO Einverständnis-Checkbox -->
+                        <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: #ccc; margin: 5px 0 15px 0; text-align: left;">
+                            <input type="checkbox" id="privacyConsent" required style="margin-top: 3px; width: auto; height: auto; cursor: pointer; flex-shrink: 0;">
+                            <label for="privacyConsent" style="cursor: pointer; line-height: 1.4;">
+                                Ich habe die <a href="#privacy" onclick="openModal('datenschutzModal'); event.preventDefault();" style="color: var(--primary-color); text-decoration: underline;">Datenschutzerklärung</a> gelesen und stimme zu, dass meine Angaben zur Bearbeitung meiner Anfrage erhoben, gespeichert und verarbeitet werden.*
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn">Absenden</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" style="display: none; position: fixed; bottom: 30px; right: 30px; background-color: #1c1c1c; color: #ffffff; border-left: 4px solid var(--primary-color); padding: 15px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 2000; border-radius: 4px; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; transform: translateY(100px); opacity: 0; align-items: center; gap: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 0.9rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; display: inline-block; color: var(--primary-color); vertical-align: middle; flex-shrink: 0;">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span id="toast-message">Vielen Dank für Ihre Nachricht! Wir melden uns in Kürze.</span>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 Schnitt & Stil. Alle Rechte vorbehalten.</p>
+        <p style="margin-top: 10px;">
+            <a href="#impressum" onclick="openModal('impressumModal'); event.preventDefault();">Impressum</a> | 
+            <a href="#privacy" onclick="openModal('datenschutzModal'); event.preventDefault();">Datenschutzerklärung</a>
+        </p>
+    </footer>
+
+    <!-- IMPRESSUM MODAL -->
+    <div id="impressumModal" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 3000; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 20px;">
+        <div style="background-color: #ffffff; color: var(--dark-color); max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 8px; padding: 35px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <button onclick="closeModal('impressumModal')" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+            <h2 style="font-family: Georgia, serif; margin-bottom: 25px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; text-align: left;">Impressum</h2>
+            <div style="font-size: 0.95rem; line-height: 1.6; text-align: left;">
+                <p><strong>Schnitt & Stil GmbH</strong></p>
+                <p>Musterstraße 12<br>12345 Musterstadt</p>
+                <br>
+                <p><strong>Vertreten durch:</strong></p>
+                <p>Inhaber: Max Mustermann</p>
+                <br>
+                <p><strong>Kontakt:</strong></p>
+                <p>Telefon: +49 (0) 123 456789<br>E-Mail: info@schnitt-und-stil.de</p>
+                <br>
+                <p><strong>Umsatzsteuer-ID:</strong></p>
+                <p>Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>DE 987654321</p>
+                <br>
+                <p><strong>Aufsichtsbehörde:</strong></p>
+                <p>Handwerkskammer Musterstadt, Musterweg 1, 12345 Musterstadt</p>
+                <br>
+                <p><strong>EU-Streitschlichtung:</strong></p>
+                <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" style="color: var(--primary-color); text-decoration: underline;">https://ec.europa.eu/consumers/odr/</a>.<br>Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>
+                <br>
+                <p><strong>Verbraucherstreitbeilegung/Universalschlichtungsstelle:</strong></p>
+                <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+            </div>
+            <button onclick="closeModal('impressumModal')" class="btn" style="margin-top: 30px; display: block; width: 100%;">Schließen</button>
+        </div>
+    </div>
+
+    <!-- DATENSCHUTZ MODAL -->
+    <div id="datenschutzModal" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 3000; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 20px;">
+        <div style="background-color: #ffffff; color: var(--dark-color); max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 8px; padding: 35px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <button onclick="closeModal('datenschutzModal')" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+            <h2 style="font-family: Georgia, serif; margin-bottom: 25px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; text-align: left;">Datenschutzerklärung</h2>
+            <div style="font-size: 0.9rem; line-height: 1.6; text-align: left; max-height: 45vh; overflow-y: auto; padding-right: 15px; border: 1px solid #eee; padding: 15px; border-radius: 4px; margin-bottom: 20px; background-color: #fdfdfd;">
+                <h3 style="font-family: Georgia, serif; margin-bottom: 10px;">1. Datenschutz auf einen Blick</h3>
+                <p style="margin-bottom: 10px;"><strong>Allgemeine Hinweise</strong></p>
+                <p style="margin-bottom: 15px;">Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
+                <p style="margin-bottom: 10px;"><strong>Datenerfassung auf dieser Website</strong></p>
+                <p style="margin-bottom: 5px;"><em>Wer ist verantwortlich für die Datenerfassung auf dieser Website?</em></p>
+                <p style="margin-bottom: 10px;">Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.</p>
+                <p style="margin-bottom: 5px;"><em>Wie erfassen wir Ihre Daten?</em></p>
+                <p style="margin-bottom: 10px;">Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich z. B. um Daten handeln, die Sie in das Kontaktformular eingeben.</p>
+                <p style="margin-bottom: 10px;">Andere Daten werden automatisch oder nach Ihrer Einwilligung beim Besuch der Website durch unsere IT-Systeme erfasst. Das sind vor allem technische Daten (z. B. Internetbrowser, Betriebssystem oder Uhrzeit des Seitenaufrufs). Die Erfassung dieser Daten erfolgt automatisch, sobald Sie diese Website betreten (Protokolldaten Ihres Browsers an den Webhosting-Anbieter).</p>
+                <p style="margin-bottom: 5px;"><em>Wofür nutzen wir Ihre Daten?</em></p>
+                <p style="margin-bottom: 15px;">Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der Website zu gewährleisten. Ihre Formulardaten werden ausschließlich zur Bearbeitung Ihres Anliegens genutzt.</p>
+
+                <h3 style="font-family: Georgia, serif; margin-bottom: 10px; margin-top: 20px;">2. Allgemeine Hinweise und Pflichtinformationen</h3>
+                <p style="margin-bottom: 10px;"><strong>Datenschutz</strong></p>
+                <p style="margin-bottom: 10px;">Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
+                <p style="margin-bottom: 10px;">Wenn Sie diese Website benutzen, werden verschiedene personenbezogene Daten erhoben. Diese Datenschutzerklärung erläutert, welche Daten wir erheben und wofür wir sie nutzen. Sie erklärt auch, wie und zu welchem Zweck das geschieht.</p>
+                <p style="margin-bottom: 15px;">Wir weisen darauf hin, dass die Datenübertragung im Internet (z. B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.</p>
+                <p style="margin-bottom: 10px;"><strong>Hinweis zur verantwortlichen Stelle</strong></p>
+                <p style="margin-bottom: 15px;">Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br>
+                Schnitt & Stil GmbH<br>Inhaber: Max Mustermann<br>Musterstraße 12, 12345 Musterstadt<br>E-Mail: info@schnitt-und-stil.de</p>
+                <p style="margin-bottom: 10px;"><strong>Speicherdauer</strong></p>
+                <p style="margin-bottom: 15px;">Soweit innerhalb dieser Datenschutzerklärung keine speziellere Speicherdauer genannt wurde, verbleiben Ihre personenbezogenen Daten bei uns, bis der Zweck für die Datenverarbeitung entfällt (z.B. nach der Klärung Ihrer Anfrage). Wenn Sie ein berechtigtes Löschbegehren geltend machen oder eine Einwilligung zur Datenverarbeitung widerrufen, werden Ihre Daten gelöscht, sofern wir keine anderen rechtlich zulässigen Gründe für die Speicherung Ihrer personenbezogenen Daten haben (z. B. steuer- oder handelsrechtliche Aufbewahrungsfristen).</p>
+
+                <h3 style="font-family: Georgia, serif; margin-bottom: 10px; margin-top: 20px;">3. Datenerfassung auf dieser Website</h3>
+                <p style="margin-bottom: 10px;"><strong>Kontaktformular</strong></p>
+                <p style="margin-bottom: 10px;">Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.</p>
+                <p style="margin-bottom: 15px;">Die Verarbeitung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO, sofern Ihre Anfrage mit der Erfüllung eines Vertrags zusammenhängt oder zur Durchführung vorvertraglicher Maßnahmen erforderlich ist (z.B. Terminanfrage). In allen übrigen Fällen beruht die Verarbeitung auf unserem berechtigten Interesse an der effektiven Bearbeitung der an uns gerichteten Anfragen (Art. 6 Abs. 1 lit. f DSGVO).</p>
+
+                <h3 style="font-family: Georgia, serif; margin-bottom: 10px; margin-top: 20px;">4. Datenschutzfreundliche Merkmale dieser Website</h3>
+                <p style="margin-bottom: 10px;"><strong>Keine Tracking-Cookies & Keine Webanalyse</strong></p>
+                <p style="margin-bottom: 10px;">Diese Website verzichtet vollständig auf den Einsatz von Tracking-Cookies, Werbe-Pixeln oder externen Analysediensten (wie Google Analytics oder Facebook Pixel). Daher ist auch kein störendes Cookie-Consent-Banner erforderlich, da wir keinerlei zustimmungsbedürftigen Cookies oder Tracking-Methoden nutzen.</p>
+                <p style="margin-bottom: 10px;"><strong>Keine Einbindung von Fremdschriftarten (Lokale Systemschriften)</strong></p>
+                <p style="margin-bottom: 10px;">Um Ihre Privatsphäre optimal zu schützen, binden wir Schriftarten nicht von externen Servern dritter Anbieter (wie Google Fonts) ein. Beim Laden dieser Seite wird somit keine Verbindung zu Servern von Google hergestellt, wodurch auch Ihre IP-Adresse nicht dorthin übertragen werden kann.</p>
+                <p style="margin-bottom: 10px;"><strong>Keine externen Icon-Bibliotheken</strong></p>
+                <p style="margin-bottom: 10px;">Alle Symbole auf dieser Website sind direkt als sichere Vektorgrafiken (Inline-SVG) im HTML-Code integriert. Es findet kein Nachladen von externen CDNs statt.</p>
+            </div>
+            <button onclick="closeModal('datenschutzModal')" class="btn" style="display: block; width: 100%;">Schließen</button>
+        </div>
+    </div>
+
+    <!-- INTERACTION LOGIC SCRIPT -->
+    <script>
+        // Responsive Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const menuIcon = document.getElementById('menuIcon');
+
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                if (navLinks.classList.contains('active')) {
+                    menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />`;
+                } else {
+                    menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />`;
+                }
+            });
+        }
+
+        // Close Mobile Menu on Navlink click
+        const links = document.querySelectorAll('#navLinks a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                if (navLinks && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    if (menuIcon) {
+                        menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />`;
+                    }
+                }
+            });
+        });
+
+        // Elegant Non-Blocking Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.innerText = message;
+            toast.style.display = 'flex';
+            
+            // Trigger animation in next frame
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                     toast.style.transform = 'translateY(0)';
+                     toast.style.opacity = '1';
+                }, 50);
+            });
+
+            // Auto dismiss after 4 seconds
+            setTimeout(() => {
+                 toast.style.transform = 'translateY(100px)';
+                 toast.style.opacity = '0';
+                 setTimeout(() => {
+                     toast.style.display = 'none';
+                 }, 300);
+            }, 4000);
+        }
+
+        // Modal Handler Functions (GDPR compliant popups within iframe)
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // prevent background scrolling
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // restore scrolling
+                
+                // Clear any hash in url to keep it neat
+                if (window.location.hash === '#impressum' || window.location.hash === '#privacy') {
+                    history.replaceState(null, null, ' ');
+                }
+            }
+        }
+
+        // Close Modal on clicking outside of content box
+        window.onclick = function(event) {
+            const impressum = document.getElementById('impressumModal');
+            const datenschutz = document.getElementById('datenschutzModal');
+            if (event.target === impressum) {
+                closeModal('impressumModal');
+            }
+            if (event.target === datenschutz) {
+                closeModal('datenschutzModal');
+            }
+        }
+    </script>
+
+</body>
+</html>
